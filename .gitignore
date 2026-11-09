@@ -1,0 +1,21 @@
+# Python 缓存
+__pycache__/
+*.pyc
+
+# Conda / Python 环境
+.venv/
+venv/
+.env/
+
+# 训练好的模型
+models/**/*.npz
+models/**/*.npy
+models/**/*.pkl
+
+# 数据集
+data/
+datasets/
+
+# IDE
+.idea/
+.vscode/
