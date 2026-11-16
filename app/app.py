@@ -1,4 +1,3 @@
-
 import tkinter as tk
 import numpy as np
 from PIL import Image, ImageDraw
@@ -21,7 +20,7 @@ class MNISTApp:
         self.canvas_size = 224
 
         # =========================
-        # 加载模型
+        # 初始化模型
         # =========================
         self.models = {
             "KNN": KNNClassifier(k=5),
@@ -29,8 +28,27 @@ class MNISTApp:
             "MLP": MLPClassifier()
         }
 
-        for model in self.models.values():
-            model.load()
+        # 记录模型加载状态和错误信息
+        self.model_loaded = {}
+        self.model_errors = {}
+
+        # 逐个加载模型，某个模型失败不影响其他模型
+        for name, model in self.models.items():
+            try:
+                model.load()
+                self.model_loaded[name] = True
+                self.model_errors[name] = None
+                print(f"{name} 模型加载成功")
+
+            except FileNotFoundError:
+                self.model_loaded[name] = False
+                self.model_errors[name] = "模型文件不存在"
+                print(f"{name} 模型文件不存在，请先训练")
+
+            except Exception as e:
+                self.model_loaded[name] = False
+                self.model_errors[name] = str(e)
+                print(f"{name} 模型加载失败：{e}")
 
         self.selected_models = {
             name: tk.BooleanVar(value=True)
@@ -247,6 +265,18 @@ class MNISTApp:
                 confidence_label
             )
 
+            # 启动时显示模型状态
+            if not self.model_loaded[name]:
+                prediction_label.config(
+                    text="未加载",
+                    fg="#dc2626"
+                )
+
+                if self.model_errors[name] == "模型文件不存在":
+                    confidence_label.config(text="请先训练模型")
+                else:
+                    confidence_label.config(text="模型加载失败")
+
     # =========================
     # 模型选择
     # =========================
@@ -318,8 +348,25 @@ class MNISTApp:
             )
 
             if name not in selected:
-                prediction_label.config(text="--")
+                prediction_label.config(
+                    text="--",
+                    fg=self.blue
+                )
                 confidence_label.config(text="未选择")
+                continue
+
+            # 检查模型是否成功加载
+            if not self.model_loaded[name]:
+                prediction_label.config(
+                    text="未加载",
+                    fg="#dc2626"
+                )
+
+                if self.model_errors[name] == "模型文件不存在":
+                    confidence_label.config(text="请先运行训练脚本")
+                else:
+                    confidence_label.config(text="模型加载失败")
+
                 continue
 
             try:
@@ -339,7 +386,9 @@ class MNISTApp:
                     text="错误",
                     fg="#dc2626"
                 )
-                confidence_label.config(text=str(e))
+                confidence_label.config(
+                    text=str(e)
+                )
 
     # =========================
     # 清空画板
@@ -354,11 +403,25 @@ class MNISTApp:
         )
         self.draw = ImageDraw.Draw(self.image)
 
-        for prediction_label, confidence_label in (
-            self.result_labels.values()
+        for name, (prediction_label, confidence_label) in (
+            self.result_labels.items()
         ):
-            prediction_label.config(text="--")
-            confidence_label.config(text="等待识别")
+            if self.model_loaded[name]:
+                prediction_label.config(
+                    text="--",
+                    fg=self.blue
+                )
+                confidence_label.config(text="等待识别")
+            else:
+                prediction_label.config(
+                    text="未加载",
+                    fg="#dc2626"
+                )
+
+                if self.model_errors[name] == "模型文件不存在":
+                    confidence_label.config(text="请先训练模型")
+                else:
+                    confidence_label.config(text="模型加载失败")
 
 
 if __name__ == "__main__":
