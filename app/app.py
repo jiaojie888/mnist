@@ -5,7 +5,8 @@ from PIL import Image, ImageDraw
 from model_loaders.knn import KNNClassifier
 from model_loaders.logistic import LogisticRegression
 from model_loaders.mlp import MLPClassifier
-
+from model_loaders.cnn import CNNModel
+from model_loaders.cnn_tensorflow import CNNTensorFlowModel
 
 class MNISTApp:
     def __init__(self, root):
@@ -25,7 +26,9 @@ class MNISTApp:
         self.models = {
             "KNN": KNNClassifier(k=5),
             "逻辑回归": LogisticRegression(),
-            "MLP": MLPClassifier()
+            "MLP": MLPClassifier(),
+            "CNN(Numpy)": CNNModel(),
+            "CNN(TensorFlow)": CNNTensorFlowModel(),
         }
 
         # 记录模型加载状态和错误信息
@@ -103,7 +106,7 @@ class MNISTApp:
                 text=name,
                 command=lambda n=name: self.toggle_model(n),
                 font=("Microsoft YaHei", 9, "bold"),
-                width=11,
+                width=24,
                 bd=0,
                 relief=tk.FLAT,
                 cursor="hand2",

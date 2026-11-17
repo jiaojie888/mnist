@@ -11,7 +11,9 @@ venv/
 models/**/*.npz
 models/**/*.npy
 models/**/*.pkl
+models/**/*.keras
 
+*.keras
 *.npz
 *.npy
 *.pkl
